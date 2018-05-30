@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">             CityListdemo     </string>
+    <string name="app_no_record">        No City Data Available  </string>
+
+    <string name="app_city_view">        City List View   </string>
+    <string name="app_city_name_label">  City Name        </string>
+    <string name="app_population_lable"> Population       </string>
+    <string name="app_state_label">      State            </string>
+    <string name="app_add">              Add Data         </string>
+    <string name="app_city_detail">      Add City Details </string>
+
+    <!-- City List Data labels Validation -->
+    <string name="app_enter_city_name">  Enter city name  </string>
+    <string name="app_enter_population"> Enter Population </string>
+    <string name="app_enter_state">      Enter State      </string>
+
+
+    <!--Action Sheet Optins label-->
+    <string name="app_sort_with_name">       Sort By Name       </string>
+    <string name="app_sort_with_population"> Sort By Population </string>
+    <string name="app_sort_with_date">       Sort By Date       </string>
+    <string name="app_cancel">       Cancel       </string>
+</resources>
