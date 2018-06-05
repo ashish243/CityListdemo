@@ -12,6 +12,7 @@
     <!-- City List Data labels Validation -->
     <string name="app_enter_city_name">  Enter city name  </string>
     <string name="app_enter_population"> Enter Population </string>
+    <string name="app_enter_validpopulation"> Population not start with Zero </string>
     <string name="app_enter_state">      Enter State      </string>
 
 

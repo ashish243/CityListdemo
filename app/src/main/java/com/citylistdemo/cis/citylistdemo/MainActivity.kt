@@ -1,7 +1,7 @@
 package com.citylistdemo.cis.citylistdemo
 
-import BeanClasses.CityListBean
-import adapter.CityListAdapter
+import models.CityListBean
+
 import android.graphics.Canvas
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -12,12 +12,16 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
-import citydataInterface.CityDataInterface
-import cityfragment.AddCityDialog
+import com.citylistdemo.cis.citylistdemo.cityfragment.AddCityDialog
 import com.baoyz.actionsheet.ActionSheet
+import controller.CityListAdapter
+import controller.SwipeControllerActions
+import controller.citylistInterface.CityDataInterface
 import kotlinx.android.synthetic.main.activity_main.*
-import sqlite.CityDBManager
+import models.sqlite.CityDBManager
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,26 +31,26 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
     var listNotes = ArrayList<CityListBean>()
     var deletedList = ArrayList<String>()
     var dbManager: CityDBManager? = null
-    var sortingFlag = "ByDate"
+    private var sortingFlag = "ByDate"
     lateinit var snackbar: Snackbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         dbManager = CityDBManager(this)
-        Initialize()
+        initialize()
         loadQueryAll()
 
     }
 
-    fun Initialize() {
+   private fun initialize() {
         iv_add_city.setOnClickListener(this)
         iv_sortlist.setOnClickListener(this)
     }
 
-   // Function for inhitialize RecyclerView
+   // Function for initialize RecyclerView
     private fun setupRecyclerView() {
-        var swipeController: SwipeController? = null
+        val swipeController: SwipeController?
 
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = mAdapter
@@ -56,29 +60,28 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
             override
             fun onRightClicked(position: Int) {
 
-
-                if(deletedList.size==0){
-                    deletedList.add(listNotes[position].CityName.toString())
-                  }else{
+                if (deletedList.isEmpty()) {
+                    deletedList.add(listNotes[position].CityName.toUpperCase())
+                } else {
                     val selectionArgs = arrayOf(deletedList[0])
                     dbManager?.delete("CityName=?", selectionArgs)
                     deletedList.clear()
-                    deletedList.add(listNotes[position].CityName.toString())
+                    deletedList.add(listNotes[position].CityName.toUpperCase())
                 }
 
-               /*val selectionArgs = arrayOf(listNotes[position].CityName.toString())
-                dbManager?.delete("CityName=?", selectionArgs)*/
+                /*val selectionArgs = arrayOf(listNotes[position].CityName.toString())
+                 dbManager?.delete("CityName=?", selectionArgs)*/
 
 
-                listNotes?.removeAt(position)
+                listNotes.removeAt(position)
                 mAdapter?.notifyItemRemoved(position)
-                mAdapter?.notifyItemRangeChanged(position, mAdapter!!.getItemCount())
+                mAdapter?.notifyItemRangeChanged(position, mAdapter!!.itemCount)
 
 
                 if (listNotes.size == 0) {
-                    tv_norecord_found.visibility = View.VISIBLE
-                    recyclerView.visibility = View.GONE
-                    iv_sortlist.visibility = View.GONE
+                    tv_norecord_found.visibility = VISIBLE
+                    recyclerView.visibility = GONE
+                    iv_sortlist.visibility = GONE
                 }
 
 
@@ -100,7 +103,7 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
 
         recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
             override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State?) {
-                swipeController?.onDraw(c)
+                swipeController.onDraw(c)
             }
         })
     }
@@ -114,11 +117,11 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
         if (cursor!!.moveToFirst()) {
 
             do {
-                val CityName = cursor.getString(cursor.getColumnIndex("CityName"))
-                val CityPopulation = cursor.getString(cursor.getColumnIndex("CityPopulation"))
-                val Satate = cursor.getString(cursor.getColumnIndex("State"))
-                val DateTime = cursor.getString(cursor.getColumnIndex("DateTime"))
-                listNotes.add(CityListBean(CityName, CityPopulation.toInt(), Satate, DateTime))
+                val cityName = cursor.getString(cursor.getColumnIndex("CityName"))
+                val cityPopulation = cursor.getString(cursor.getColumnIndex("CityPopulation"))
+                val state = cursor.getString(cursor.getColumnIndex("State"))
+                val dateTime = cursor.getString(cursor.getColumnIndex("DateTime"))
+                listNotes.add(CityListBean(cityName, cityPopulation.toInt(), state, dateTime))
 
             } while (cursor.moveToNext())
         }
@@ -128,11 +131,11 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
         if (listNotes.size != 0) {
 
             tv_norecord_found.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-            iv_sortlist.visibility = View.VISIBLE
-            mAdapter = CityListAdapter(this, listNotes)
+            recyclerView.visibility = VISIBLE
+            iv_sortlist.visibility = VISIBLE
+            mAdapter = CityListAdapter(listNotes)
 
-            CheckSorting()
+            this.checkSorting()
 
             setupRecyclerView()
         }
@@ -140,52 +143,48 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
 
 
     // Comparator for Ascending Order By Name
-    var StringAscComparator: Comparator<CityListBean> = object : Comparator<CityListBean> {
+    private var stringAscComparator: Comparator<CityListBean> = object : Comparator<CityListBean> {
         override
         fun compare(app1: CityListBean, app2: CityListBean): Int {
 
-            return app1.let { it.CityName.compareTo(app2.let { it.CityName },true) }
+            return app1.CityName.compareTo(app2.CityName,true)
         }
     }
 
     // Comparator for Date Desending Order By Date
-    var DateAscComparator: Comparator<CityListBean> = object : Comparator<CityListBean> {
+    private var dateAscComparator: Comparator<CityListBean> = object : Comparator<CityListBean> {
         override
         fun compare(app2: CityListBean, app1: CityListBean): Int {
 
-            return app1.let { it.Date.compareTo(app2.let { it.Date },true) }
+            return app1.Date.compareTo(app2.Date,true)
         }
     }
 
-    override fun onClick(v: View) {
+    override fun onClick(v: View) = when (v) {
+        iv_add_city -> {
 
-
-        when (v) {
-            iv_add_city -> {
-
-                if(deletedList.size!=0){
-                    val selectionArgs = arrayOf(deletedList[0])
-                    dbManager?.delete("CityName=?", selectionArgs)
-                    deletedList.clear()
-                }
-
-                val fm = supportFragmentManager
-                val addCityDialog = AddCityDialog()
-                addCityDialog.setCancelable(false)
-                addCityDialog.show(fm, "fragment_add_city")
-
+            if(deletedList.size!=0){
+                val selectionArgs = arrayOf(deletedList[0])
+                dbManager?.delete("CityName=?", selectionArgs)
+                deletedList.clear()
             }
-            iv_sortlist ->{
-                openActionSheet()
-            }
-            else -> { // Note the block
-                //print("")
-            }
+
+            val fm = supportFragmentManager
+            val addCityDialog = AddCityDialog()
+            addCityDialog.isCancelable = false
+            addCityDialog.show(fm, "fragment_add_city")
+
+        }
+        iv_sortlist ->{
+            openActionSheet()
+        }
+        else -> { // Note the block
+            //print("")
         }
     }
 
-    fun openActionSheet(){
-        ActionSheet.createBuilder(this, getSupportFragmentManager())
+    private fun openActionSheet(){
+        ActionSheet.createBuilder(this, supportFragmentManager)
                 .setCancelButtonTitle(getString(R.string.app_cancel))
                 .setOtherButtonTitles(getString(R.string.app_sort_with_name), getString(R.string.app_sort_with_population), getString(R.string.app_sort_with_date))
                 .setCancelableOnTouchOutside(true)
@@ -193,13 +192,10 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
     }
 
 
-    fun CheckSorting(){
-        if(sortingFlag.equals("ByDate")){
-            listNotes.sortWith(DateAscComparator)
-        }else if(sortingFlag.equals("ByName")){
-            listNotes.sortWith(StringAscComparator)
-        }else{
-            // public fun <T> Array<out T>.sortWith(comparator: Comparator<in T>): Unit
+    private fun checkSorting() = when {
+        sortingFlag == "ByDate" -> listNotes.sortWith(dateAscComparator)
+        sortingFlag == "ByName" -> listNotes.sortWith(stringAscComparator)
+        else -> // public fun <T> Array<out T>.sortWith(comparator: Comparator<in T>): Unit
             // -> Sorts the array in-place according to the order specified by the given [comparator].
             listNotes.sortWith(object: Comparator<CityListBean>{
                 override fun compare(p1: CityListBean, p2: CityListBean): Int = when {
@@ -208,7 +204,6 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
                     else -> -1
                 }
             })
-        }
     }
 
 
@@ -216,24 +211,29 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
     override fun onOtherButtonClick(actionSheet: ActionSheet, index: Int) {
 
        // Toast.makeText(this,""+index,Toast.LENGTH_LONG).show()
-        if(index==0){
-            sortingFlag= "ByName"
-            CheckSorting()
-            recyclerView.adapter = mAdapter
-            mAdapter?.notifyDataSetChanged()
-        }else if(index==1){
-            sortingFlag = "ByPopulation"
-            CheckSorting()
+        when (index) {
+            0 -> {
+                sortingFlag= "ByName"
+                checkSorting()
+                recyclerView.adapter = mAdapter
+                mAdapter?.notifyDataSetChanged()
+            }
+            1 -> {
+                sortingFlag = "ByPopulation"
+                checkSorting()
 
-            recyclerView.adapter = mAdapter
-            mAdapter?.notifyDataSetChanged()
-        }else if(index==2){
-            sortingFlag= "ByDate"
-            CheckSorting()
-            recyclerView.adapter = mAdapter
-            mAdapter?.notifyDataSetChanged()
-        }else{
+                recyclerView.adapter = mAdapter
+                mAdapter?.notifyDataSetChanged()
+            }
+            2 -> {
+                sortingFlag= "ByDate"
+                checkSorting()
+                recyclerView.adapter = mAdapter
+                mAdapter?.notifyDataSetChanged()
+            }
+            else -> {
 
+            }
         }
     }
 
@@ -255,7 +255,7 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
         Toast.makeText(this, "click Cancel", Toast.LENGTH_LONG).show()
     }
 
-    fun removeDeletedItem(){
+    private fun removeDeletedItem(){
         if(deletedList.size!=0){
             val selectionArgs = arrayOf(deletedList[0])
             dbManager?.delete("CityName=?", selectionArgs)
@@ -272,11 +272,11 @@ class MainActivity : FragmentActivity(), View.OnClickListener, CityDataInterface
     override fun onStop() {
         super.onStop()
         removeDeletedItem()
-        Log.v("Stop","Stop");
+        Log.v("Stop","Stop")
     }
     override fun onDestroy() {
         super.onDestroy()
-        Log.v("Destroy","Destroy");
+        Log.v("Destroy","Destroy")
    }
 
 }

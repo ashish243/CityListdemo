@@ -1,7 +1,7 @@
-package adapter
+package controller
 
-import BeanClasses.CityListBean
-import android.content.Context
+import models.CityListBean
+import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -10,9 +10,9 @@ import com.citylistdemo.cis.citylistdemo.R
 import kotlinx.android.synthetic.main.city_list_row.view.*
 
 /**
- * Created by cis on 29/5/18.
- */
-class CityListAdapter(var context: Context, var cityList: ArrayList<CityListBean> ): RecyclerView.Adapter<CityListAdapter.MyCityViewHolder>() {
+* Created by cis on 29/5/18.
+*/
+class CityListAdapter(private var cityList: ArrayList<CityListBean> ): RecyclerView.Adapter<CityListAdapter.MyCityViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): MyCityViewHolder {
@@ -24,9 +24,10 @@ class CityListAdapter(var context: Context, var cityList: ArrayList<CityListBean
 
     override fun getItemCount(): Int = cityList.size
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyCityViewHolder?, position: Int) {
 
-        var mVale = cityList[position]
+        val mVale = cityList[position]
         holder?.tvCityName?.text  = "Name: "+mVale.CityName
         holder?.tvCityState?.text = "StateName: "+mVale.State
         holder?.tvState?.text     = "Population: "+mVale.CityPopulation
@@ -34,9 +35,9 @@ class CityListAdapter(var context: Context, var cityList: ArrayList<CityListBean
     }
 
     class MyCityViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val tvCityName  = view.tv_cityname
-        val tvCityState = view.tv_state
-        val tvState     = view.tv_city_population
+        val tvCityName  = view.tv_cityname!!
+        val tvCityState = view.tv_state!!
+        val tvState     = view.tv_city_population!!
 
     }
 }

@@ -17,14 +17,15 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="8dp">
             <TextView
                 android:id="@+id/tv_cityname"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -38,8 +39,8 @@
                 android:id="@+id/tv_city_population"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Population"/>
+                android:layout_alignParentRight="true"
+                android:text=""/>
 
         </RelativeLayout>
 
@@ -53,7 +54,7 @@
                 android:id="@+id/tv_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="State: "/>
+                android:text=""/>
 
         </LinearLayout>
 

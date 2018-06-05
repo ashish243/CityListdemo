@@ -7,14 +7,14 @@ import android.os.Handler
 import android.view.Window
 
 /**
- * Created by cis on 28/5/18.
- */
+* Created by cis on 28/5/18.
+*/
 class Splash (): Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //Remove title bar
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         setContentView(R.layout.splash)
 

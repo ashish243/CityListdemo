@@ -1,9 +1,10 @@
-package cityfragment
+package com.citylistdemo.cis.citylistdemo.cityfragment
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import com.citylistdemo.cis.citylistdemo.R
-import citydataInterface.CityDataInterface
+import controller.citylistInterface.CityDataInterface
 import android.app.Activity
 import android.content.ContentValues
 import android.util.Log
@@ -13,46 +14,48 @@ import android.view.ViewGroup
 import android.widget.Toast
 import kotlinx.android.synthetic.main.add_city_data.*
 import kotlinx.android.synthetic.main.add_city_data.view.*
-import sqlite.CityDBManager
+import models.sqlite.CityDBManager
 import utility.Helper
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 /**
- * Created by Aashish Sharma on 28/5/18.
- */
+* Created by Aashish Sharma on 28/5/18.
+*/
 class AddCityDialog : DialogFragment() {
 
     private var cityDataInterface: CityDataInterface? = null
     private var helper: Helper? = null
+    private var cityName = ""
+    private var cityPopulation=""
+    private var cityState = ""
 
-    var cityName = ""; var cityPopulation="";var cityState = "";
-
+    @SuppressLint("SimpleDateFormat")
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
          val rootView = inflater!!.inflate(R.layout.add_city_data, container,
                 false)
         helper = Helper(activity)
 
-        cityName       = rootView.et_enter_city_name.text.toString();
+        cityName       = rootView.et_enter_city_name.text.toString()
 
         rootView.btn_cancel.setOnClickListener({
             dialog.dismiss()
         })
 
         rootView.btn_add_data.setOnClickListener({
-            if(checlValidation ())               {
+            if(checkValidation ())               {
 
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 val strDate = sdf.format(Date())
 
                 Log.v("position", "listNotes.size" + strDate)
 
-                var dbManager = CityDBManager(activity)
+                val dbManager = CityDBManager(activity)
 
-                var values = ContentValues()
-                values.put("CityName", cityName)
+                val values = ContentValues()
+                values.put("CityName", cityName.toUpperCase())
                 values.put("CityPopulation", cityPopulation)
                 values.put("State", cityState)
                 values.put("DateTime",strDate)
@@ -73,25 +76,30 @@ class AddCityDialog : DialogFragment() {
         return rootView
     }
 
-    fun checlValidation (): Boolean
+    fun checkValidation (): Boolean
     {
-        cityName       = et_enter_city_name.text.toString();
-        cityPopulation = et_enter_city_population.text.toString();
-        cityState      = et_enter_city_state.text.toString();
+        cityName       = et_enter_city_name.text.toString().trim()
+        cityPopulation = et_enter_city_population.text.toString().trim()
+        cityState      = et_enter_city_state.text.toString().trim()
 
-        if(cityName.isNullOrEmpty())               {
+
+        return if(cityName.isEmpty() || cityName.isBlank())               {
             helper?.showToast(activity,""+getString(R.string.app_enter_city_name))
-            return false
-        }else if(cityPopulation.isNullOrEmpty())       {
+            false
+        }else if(cityPopulation.isEmpty() || cityPopulation.isBlank())       {
             helper?.showToast(activity,""+getString(R.string.app_enter_population))
-            return false
-        }else if(cityState.isNullOrEmpty())      {
-            helper?.showToast(activity,""+getString(R.string.app_enter_state))
-            return false
-        }else{
-            return true
+            false
+        }else if(cityPopulation.startsWith("0",false)){
+            helper?.showToast(activity,""+getString(R.string.app_enter_validpopulation))
+            false
+        }else {
+            if(cityState.isEmpty() || cityState.isBlank())      {
+                helper?.showToast(activity,""+getString(R.string.app_enter_state))
+                false
+            }else{
+                true
+            }
         }
-
     }
 
     override fun onAttach(activity: Activity?) {
