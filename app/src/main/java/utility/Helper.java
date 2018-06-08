@@ -1,11 +1,7 @@
 package utility;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.widget.Toast;
-import java.util.Date;
-import java.util.regex.Pattern;
 
 /**
  * Created by Aashish Sharma on 28/5/18.

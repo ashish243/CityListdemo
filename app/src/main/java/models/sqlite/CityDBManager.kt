@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper
 /**
  * Created by Aashish Sharma on 28/5/18
  */
+
 class CityDBManager(context: Context) {
 
     private val dbName = "CITYDATA"
